@@ -1,0 +1,29 @@
+# 정책 페이지만 배포한다. media/ 는 raw.githubusercontent 로 쓰므로 올릴 이유가 없고,
+# 통째로 올리면 아티팩트가 10MB 를 넘어 빌드가 느려진다.
+name: Deploy policy pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: mkdir site && cp privacy.html terms.html site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
